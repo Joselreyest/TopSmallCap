@@ -1,6 +1,5 @@
 streamlit==1.22.0
 yfinance==0.2.18
-pandas==2.0.3  # Updated to newer version that supports Python 3.13
-numpy==1.24.4  # Updated version
+pandas==2.1.4  # Newer version with proper Python 3.13 support
+numpy==1.26.0  # Newest stable version
 requests==2.31.0
-beautifulsoup4==4.12.2
