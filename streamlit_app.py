@@ -32,7 +32,7 @@ with col1:
     st.title("🚀 God Mode Stock Scanner")
     st.markdown("Find explosive stocks with strong demand signals")
 with col2:
-    st.image("assets/banner.png", width=150)
+    st.image("https://streamlit.io/images/brand/streamlit-mark-color.png", width=150)
 
 # Sidebar Filters
 with st.sidebar:
