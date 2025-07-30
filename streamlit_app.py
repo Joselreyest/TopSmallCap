@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import time
 import requests
 from bs4 import BeautifulSoup
+import html5lib  # Alternative parser for pandas read_html
 
 # --------------------------
 # APP CONFIGURATION
@@ -47,32 +48,33 @@ def get_nasdaq_symbols():
         return []
 
 def get_sp500_symbols():
-    """Get current S&P 500 symbols from Wikipedia"""
+    """Get current S&P 500 symbols with robust parsing"""
     try:
         url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
-        tables = pd.read_html(url)
+        
+        # Try with lxml first, then fall back to html5lib
+        try:
+            tables = pd.read_html(url, flavor='lxml')
+        except:
+            tables = pd.read_html(url, flavor='html5lib')
+            
         return tables[0]['Symbol'].tolist()
     except Exception as e:
         st.error(f"Failed to fetch S&P 500 symbols: {str(e)}")
-        return []
+        # Fallback to static list if online fetch fails
+        return ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'NVDA', 'JPM', 'V', 'PG']
 
 def get_nyse_symbols():
-    """Get NYSE symbols from NYSE website"""
+    """Get NYSE symbols using alternative API"""
     try:
-        url = "https://www.nyse.com/api/quotes/filter"
-        payload = {
-            "instrumentType": "EQUITY",
-            "pageNumber": 1,
-            "sortColumn": "NORMALIZED_TICKER",
-            "sortOrder": "ASC",
-            "maxResultsPerPage": 10000
-        }
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.post(url, json=payload, headers=headers)
-        return [item['symbolTicker'] for item in response.json()]
+        # Alternative reliable source for NYSE symbols
+        url = "https://old.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nyse&render=download"
+        df = pd.read_csv(url)
+        return df['Symbol'].tolist()
     except Exception as e:
         st.error(f"Failed to fetch NYSE symbols: {str(e)}")
-        return []
+        # Fallback to some common NYSE symbols
+        return ['BAC', 'WMT', 'DIS', 'GE', 'F', 'T', 'VZ', 'XOM', 'CVX', 'PFE']
 
 def load_symbols_from_file(uploaded_file):
     """Load symbols from uploaded file"""
