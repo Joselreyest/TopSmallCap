@@ -39,12 +39,10 @@ st.markdown("""
 def get_sp500_symbols():
     """Get S&P 500 symbols from reliable JSON source"""
     try:
-        url = "https://pkgstore.datahub.io/core/s-and-p-500-companies/constituents_json/data/64dd3e9582b936b0352fdd826ecd3c95/constituents_json.json"
+        url = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.json"
         response = requests.get(url)
-        data = response.json()
-        return [item['Symbol'] for item in data]
-    except Exception as e:
-        st.warning(f"Using fallback S&P 500 symbols: {str(e)}")
+        return [item['Symbol'] for item in response.json()]
+    except:
         return ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'NVDA', 'JPM', 'V', 'PG']
 
 def get_nasdaq_symbols():
@@ -53,8 +51,7 @@ def get_nasdaq_symbols():
         url = "https://raw.githubusercontent.com/rreichel3/US-Stock-Symbols/main/nasdaq/nasdaq_tickers.csv"
         df = pd.read_csv(url)
         return df['Symbol'].tolist()
-    except Exception as e:
-        st.warning(f"Using fallback NASDAQ symbols: {str(e)}")
+    except:
         return ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'NVDA', 'INTC', 'AMD', 'ADBE']
 
 def get_nyse_symbols():
@@ -63,8 +60,7 @@ def get_nyse_symbols():
         url = "https://raw.githubusercontent.com/rreichel3/US-Stock-Symbols/main/nyse/nyse_tickers.csv"
         df = pd.read_csv(url)
         return df['Symbol'].tolist()
-    except Exception as e:
-        st.warning(f"Using fallback NYSE symbols: {str(e)}")
+    except:
         return ['BAC', 'WMT', 'DIS', 'GE', 'F', 'T', 'VZ', 'XOM', 'CVX', 'PFE']
 
 def load_symbols_from_file(uploaded_file):
