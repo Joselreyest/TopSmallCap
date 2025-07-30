@@ -6,7 +6,11 @@ from datetime import datetime, timedelta
 import time
 import requests
 from bs4 import BeautifulSoup
-import html5lib  # Alternative parser for pandas read_html
+try:
+    import html5lib
+    HTML_PARSER = 'html5lib'
+except ImportError:
+    HTML_PARSER = 'lxml'
 
 # --------------------------
 # APP CONFIGURATION
@@ -52,16 +56,17 @@ def get_sp500_symbols():
     try:
         url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
         
-        # Try with lxml first, then fall back to html5lib
+        # Try available parsers
         try:
-            tables = pd.read_html(url, flavor='lxml')
-        except:
-            tables = pd.read_html(url, flavor='html5lib')
+            tables = pd.read_html(url, flavor=HTML_PARSER)
+        except Exception as e:
+            # Final fallback to basic pandas parser
+            tables = pd.read_html(url)
             
         return tables[0]['Symbol'].tolist()
     except Exception as e:
         st.error(f"Failed to fetch S&P 500 symbols: {str(e)}")
-        # Fallback to static list if online fetch fails
+        # Fallback to static list
         return ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'NVDA', 'JPM', 'V', 'PG']
 
 def get_nyse_symbols():
