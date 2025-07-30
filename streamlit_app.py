@@ -37,36 +37,32 @@ st.markdown("""
 # DATA LOADING FUNCTIONS
 # --------------------------
 def get_sp500_symbols():
-    """Get current S&P 500 symbols with robust parsing"""
+    """Get S&P 500 symbols from reliable JSON source"""
     try:
-        # Alternative reliable source for S&P 500 symbols
-        url = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv"
-        df = pd.read_csv(url)
-        return df['Symbol'].tolist()
+        url = "https://pkgstore.datahub.io/core/s-and-p-500-companies/constituents_json/data/64dd3e9582b936b0352fdd826ecd3c95/constituents_json.json"
+        response = requests.get(url)
+        data = response.json()
+        return [item['Symbol'] for item in data]
     except Exception as e:
         st.warning(f"Using fallback S&P 500 symbols: {str(e)}")
         return ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'NVDA', 'JPM', 'V', 'PG']
 
 def get_nasdaq_symbols():
-    """Get NASDAQ symbols from reliable source"""
+    """Get NASDAQ symbols from static CSV"""
     try:
-        # Using NASDAQ API directly
-        url = "https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=10000"
-        headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
-        response = requests.get(url, headers=headers)
-        data = response.json()
-        return [item['symbol'] for item in data['data']['table']['rows']]
+        url = "https://raw.githubusercontent.com/rreichel3/US-Stock-Symbols/main/nasdaq/nasdaq_tickers.csv"
+        df = pd.read_csv(url)
+        return df['Symbol'].tolist()
     except Exception as e:
         st.warning(f"Using fallback NASDAQ symbols: {str(e)}")
         return ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'NVDA', 'INTC', 'AMD', 'ADBE']
 
 def get_nyse_symbols():
-    """Get NYSE symbols using reliable method"""
+    """Get NYSE symbols from static CSV"""
     try:
-        # Using Wikipedia's NYSE list
-        url = 'https://en.wikipedia.org/wiki/List_of_companies_listed_on_the_New_York_Stock_Exchange'
-        tables = pd.read_html(url)
-        return tables[0]['Symbol'].tolist()
+        url = "https://raw.githubusercontent.com/rreichel3/US-Stock-Symbols/main/nyse/nyse_tickers.csv"
+        df = pd.read_csv(url)
+        return df['Symbol'].tolist()
     except Exception as e:
         st.warning(f"Using fallback NYSE symbols: {str(e)}")
         return ['BAC', 'WMT', 'DIS', 'GE', 'F', 'T', 'VZ', 'XOM', 'CVX', 'PFE']
