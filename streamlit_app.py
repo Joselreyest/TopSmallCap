@@ -56,11 +56,12 @@ def get_sp500_symbols():
     try:
         url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
         
-        # Try available parsers
+        # Try with lxml first
         try:
-            tables = pd.read_html(url, flavor=HTML_PARSER)
+            tables = pd.read_html(url, flavor='lxml')
         except Exception as e:
-            # Final fallback to basic pandas parser
+            # Fall back to basic parser without specifying flavor
+            st.warning("lxml parser not available, using pandas default parser")
             tables = pd.read_html(url)
             
         return tables[0]['Symbol'].tolist()
