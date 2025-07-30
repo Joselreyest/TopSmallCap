@@ -36,50 +36,39 @@ st.markdown("""
 # --------------------------
 # DATA LOADING FUNCTIONS
 # --------------------------
-def get_nasdaq_symbols():
-    """Get NASDAQ symbols from NASDAQ website"""
+def get_sp500_symbols():
+    """Get current S&P 500 symbols with robust parsing"""
     try:
+        # Alternative reliable source for S&P 500 symbols
+        url = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv"
+        df = pd.read_csv(url)
+        return df['Symbol'].tolist()
+    except Exception as e:
+        st.warning(f"Using fallback S&P 500 symbols: {str(e)}")
+        return ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'NVDA', 'JPM', 'V', 'PG']
+
+def get_nasdaq_symbols():
+    """Get NASDAQ symbols from reliable source"""
+    try:
+        # Using NASDAQ API directly
         url = "https://api.nasdaq.com/api/screener/stocks?tableonly=true&limit=10000"
-        headers = {
-            "User-Agent": "Mozilla/5.0",
-            "Accept": "application/json"
-        }
+        headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
         response = requests.get(url, headers=headers)
         data = response.json()
         return [item['symbol'] for item in data['data']['table']['rows']]
     except Exception as e:
-        st.error(f"Failed to fetch NASDAQ symbols: {str(e)}")
-        return []
-
-def get_sp500_symbols():
-    """Get current S&P 500 symbols with robust parsing"""
-    try:
-        url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
-        
-        # Try with lxml first
-        try:
-            tables = pd.read_html(url, flavor='lxml')
-        except Exception as e:
-            # Fall back to basic parser without specifying flavor
-            st.warning("lxml parser not available, using pandas default parser")
-            tables = pd.read_html(url)
-            
-        return tables[0]['Symbol'].tolist()
-    except Exception as e:
-        st.error(f"Failed to fetch S&P 500 symbols: {str(e)}")
-        # Fallback to static list
-        return ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'NVDA', 'JPM', 'V', 'PG']
+        st.warning(f"Using fallback NASDAQ symbols: {str(e)}")
+        return ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'NVDA', 'INTC', 'AMD', 'ADBE']
 
 def get_nyse_symbols():
-    """Get NYSE symbols using alternative API"""
+    """Get NYSE symbols using reliable method"""
     try:
-        # Alternative reliable source for NYSE symbols
-        url = "https://old.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=nyse&render=download"
-        df = pd.read_csv(url)
-        return df['Symbol'].tolist()
+        # Using Wikipedia's NYSE list
+        url = 'https://en.wikipedia.org/wiki/List_of_companies_listed_on_the_New_York_Stock_Exchange'
+        tables = pd.read_html(url)
+        return tables[0]['Symbol'].tolist()
     except Exception as e:
-        st.error(f"Failed to fetch NYSE symbols: {str(e)}")
-        # Fallback to some common NYSE symbols
+        st.warning(f"Using fallback NYSE symbols: {str(e)}")
         return ['BAC', 'WMT', 'DIS', 'GE', 'F', 'T', 'VZ', 'XOM', 'CVX', 'PFE']
 
 def load_symbols_from_file(uploaded_file):
